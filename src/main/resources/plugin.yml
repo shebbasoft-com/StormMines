@@ -1,0 +1,4 @@
+name: StormMines
+version: '${project.version}'
+main: com.shebbasoft.storm.mine.StormMines
+api-version: 1.19
