@@ -4,11 +4,7 @@ import com.shebbasoft.shebbasoftlib.minecraft.command.SimpleCommand;
 import com.shebbasoft.storm.mine.Mine;
 import com.shebbasoft.storm.mine.MineController;
 import com.shebbasoft.storm.mine.StormMines;
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.bukkit.BukkitPlayer;
-import com.sk89q.worldedit.extension.input.InputParseException;
-import com.sk89q.worldedit.extension.input.ParserContext;
-import com.sk89q.worldedit.function.pattern.Pattern;
+import com.shebbasoft.storm.mine.WorldEditMine;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -56,22 +52,13 @@ public class SetPatternCommand extends SimpleCommand {
 
         Mine mine = optionalMine.get();
 
-        // The documentation stats to not make patterns this way, but its just so much easier.
-        ParserContext context = new ParserContext();
-        BukkitPlayer bukkitPlayer = new BukkitPlayer(player);
-        context.setActor(bukkitPlayer);
-        context.setWorld(bukkitPlayer.getWorld());
-        context.setSession(WorldEdit.getInstance().getSessionManager().getIfPresent(bukkitPlayer));
-
-        Pattern pattern;
-        try {
-            pattern = WorldEdit.getInstance().getPatternFactory().parseFromInput(arguments[1], context);
-        } catch (InputParseException e) {
-            sender.sendMessage(ChatColor.RED + "Error: Invalid WorldEdit pattern");
-            return;
+        if (mine instanceof WorldEditMine worldEditMine) {
+            worldEditMine.setPattern(arguments[1], player);
+        } else {
+            // things like #copy won't work as it is missing the player, but should we even support this?
+            mine.setPattern(arguments[1]);
         }
 
-        mine.setPattern(pattern);
         mine.reset();
         sender.sendMessage(ChatColor.GREEN + "Set mine pattern successfully.");
     }

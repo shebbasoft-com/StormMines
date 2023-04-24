@@ -37,9 +37,9 @@ public class SetResetTimeCommand extends SimpleCommand {
             return;
         }
 
-        int time;
+        long time;
         try {
-            time = Integer.parseInt(arguments[1]);
+            time = Long.parseLong(arguments[1]);
         } catch (NumberFormatException e) {
             sender.sendMessage(ChatColor.RED + "Error: Invalid time (in seconds)");
             return;

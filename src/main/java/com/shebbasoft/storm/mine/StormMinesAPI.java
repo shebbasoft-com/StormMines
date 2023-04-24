@@ -6,4 +6,8 @@ public class StormMinesAPI {
 
     private StormMinesAPI() {}
 
+    public static MineController getMineController() {
+        return plugin.getMineController();
+    }
+
 }

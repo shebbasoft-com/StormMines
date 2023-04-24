@@ -1,7 +1,6 @@
 package com.shebbasoft.storm.mine;
 
-import com.sk89q.worldedit.function.pattern.Pattern;
-import com.sk89q.worldedit.regions.Region;
+import org.bukkit.block.Block;
 
 public interface Mine {
 
@@ -11,13 +10,15 @@ public interface Mine {
 
     void setDisplayName(String name);
 
-    Pattern getPattern();
+    String getPattern();
 
-    void setPattern(Pattern pattern);
+    void setPattern(String pattern) throws IllegalArgumentException;
 
-    Region getRegion();
+    Area getArea();
 
-    void setRegion(Region region);
+    void setArea(Area area);
+
+    boolean isInside(Block block);
 
     long getResetTime();
 
@@ -27,7 +28,7 @@ public interface Mine {
 
     void setResetPercentage(double percentage);
 
-    void setBlocksBroken(int blocks);
+    void setBlocksBroken(int amount);
 
     int getBlocksBroken();
 

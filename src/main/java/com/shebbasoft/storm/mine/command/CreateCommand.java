@@ -3,8 +3,9 @@ package com.shebbasoft.storm.mine.command;
 import com.shebbasoft.shebbasoftlib.minecraft.command.SimpleCommand;
 import com.shebbasoft.storm.mine.Mine;
 import com.shebbasoft.storm.mine.MineController;
-import com.shebbasoft.storm.mine.SimpleMine;
 import com.shebbasoft.storm.mine.StormMines;
+import com.shebbasoft.storm.mine.WorldEditArea;
+import com.shebbasoft.storm.mine.WorldEditMine;
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.WorldEdit;
@@ -64,7 +65,7 @@ public class CreateCommand extends SimpleCommand {
             return;
         }
 
-        Mine mine = new SimpleMine(selection, arguments[0]);
+        Mine mine = new WorldEditMine(arguments[0], new WorldEditArea(selection));
 
         if (arguments.length > 1) {
             mine.setDisplayName(String.join(" ", Arrays.copyOfRange(arguments, 1, arguments.length)));
