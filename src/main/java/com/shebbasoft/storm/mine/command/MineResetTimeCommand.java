@@ -12,14 +12,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class SetResetPercentageCommand extends SimpleCommand {
+public class MineResetTimeCommand extends SimpleCommand {
 
-    private static final String COMMAND_ALIAS = "setresetpercentage";
+    private static final String COMMAND_ALIAS = "setresettime";
     private static final List<String> COMMAND_ALIASES = Collections.singletonList(COMMAND_ALIAS);
 
     private final MineController mineController;
 
-    public SetResetPercentageCommand(StormMines plugin) {
+    public MineResetTimeCommand(StormMines plugin) {
         mineController = plugin.getMineController();
     }
 
@@ -37,11 +37,11 @@ public class SetResetPercentageCommand extends SimpleCommand {
             return;
         }
 
-        double percentage;
+        long time;
         try {
-            percentage = Double.parseDouble(arguments[1]);
+            time = Long.parseLong(arguments[1]);
         } catch (NumberFormatException e) {
-            sender.sendMessage(ChatColor.RED + "Error: Invalid percentage (100% = 1.0)");
+            sender.sendMessage(ChatColor.RED + "Error: Invalid time (in seconds)");
             return;
         }
 
@@ -53,12 +53,12 @@ public class SetResetPercentageCommand extends SimpleCommand {
         }
 
         Mine mine = optionalMine.get();
-        mine.setResetPercentage(percentage);
-        sender.sendMessage(ChatColor.GREEN + "Set mine reset percentage successfully.");
+        mine.setResetTime(time);
+        sender.sendMessage(ChatColor.GREEN + "Set mine reset time successfully.");
     }
 
     @Override
     public @NotNull List<String> getUsages(@NotNull CommandSender sender) {
-        return Collections.singletonList("/" + getPath() + COMMAND_ALIAS + " <name> <percentage>");
+        return Collections.singletonList("/" + getPath() + COMMAND_ALIAS + " <name> <time>");
     }
 }

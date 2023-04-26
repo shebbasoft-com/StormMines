@@ -12,14 +12,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class ResetCommand extends SimpleCommand {
+public class MineResetPercentageCommand extends SimpleCommand {
 
-    private static final String COMMAND_ALIAS = "reset";
+    private static final String COMMAND_ALIAS = "setresetpercentage";
     private static final List<String> COMMAND_ALIASES = Collections.singletonList(COMMAND_ALIAS);
 
     private final MineController mineController;
 
-    public ResetCommand(StormMines plugin) {
+    public MineResetPercentageCommand(StormMines plugin) {
         mineController = plugin.getMineController();
     }
 
@@ -31,9 +31,17 @@ public class ResetCommand extends SimpleCommand {
     @Override
     public void onCommand(@NotNull CommandSender sender, @NotNull String[] arguments) {
 
-        if (arguments.length != 1) {
+        if (arguments.length != 2) {
             sender.sendMessage(ChatColor.RED + "Error: invalid command syntax.");
             getUsages(sender).forEach(usage -> sender.sendMessage(ChatColor.AQUA + usage));
+            return;
+        }
+
+        double percentage;
+        try {
+            percentage = Double.parseDouble(arguments[1]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage(ChatColor.RED + "Error: Invalid percentage (100% = 1.0)");
             return;
         }
 
@@ -45,13 +53,12 @@ public class ResetCommand extends SimpleCommand {
         }
 
         Mine mine = optionalMine.get();
-        mine.reset();
-        sender.sendMessage(ChatColor.GREEN + "Resetting the mine named: \"" + mine.getName() + "\".");
+        mine.setResetPercentage(percentage);
+        sender.sendMessage(ChatColor.GREEN + "Set mine reset percentage successfully.");
     }
 
     @Override
     public @NotNull List<String> getUsages(@NotNull CommandSender sender) {
-        return Collections.singletonList("/" + getPath() + COMMAND_ALIAS + " <name>");
+        return Collections.singletonList("/" + getPath() + COMMAND_ALIAS + " <name> <percentage>");
     }
-
 }

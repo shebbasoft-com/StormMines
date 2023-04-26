@@ -12,14 +12,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class ListCommand extends SimpleCommand {
+public class MineListCommand extends SimpleCommand {
 
     private static final String COMMAND_ALIAS = "list";
     private static final List<String> COMMAND_ALIASES = Collections.singletonList(COMMAND_ALIAS);
 
     private final MineController mineController;
 
-    public ListCommand(StormMines plugin) {
+    public MineListCommand(StormMines plugin) {
         mineController = plugin.getMineController();
     }
 

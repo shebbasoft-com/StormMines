@@ -12,14 +12,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class SetResetTimeCommand extends SimpleCommand {
+public class MineResetCommand extends SimpleCommand {
 
-    private static final String COMMAND_ALIAS = "setresettime";
+    private static final String COMMAND_ALIAS = "reset";
     private static final List<String> COMMAND_ALIASES = Collections.singletonList(COMMAND_ALIAS);
 
     private final MineController mineController;
 
-    public SetResetTimeCommand(StormMines plugin) {
+    public MineResetCommand(StormMines plugin) {
         mineController = plugin.getMineController();
     }
 
@@ -31,17 +31,9 @@ public class SetResetTimeCommand extends SimpleCommand {
     @Override
     public void onCommand(@NotNull CommandSender sender, @NotNull String[] arguments) {
 
-        if (arguments.length != 2) {
+        if (arguments.length != 1) {
             sender.sendMessage(ChatColor.RED + "Error: invalid command syntax.");
             getUsages(sender).forEach(usage -> sender.sendMessage(ChatColor.AQUA + usage));
-            return;
-        }
-
-        long time;
-        try {
-            time = Long.parseLong(arguments[1]);
-        } catch (NumberFormatException e) {
-            sender.sendMessage(ChatColor.RED + "Error: Invalid time (in seconds)");
             return;
         }
 
@@ -53,12 +45,13 @@ public class SetResetTimeCommand extends SimpleCommand {
         }
 
         Mine mine = optionalMine.get();
-        mine.setResetTime(time);
-        sender.sendMessage(ChatColor.GREEN + "Set mine reset time successfully.");
+        mine.reset();
+        sender.sendMessage(ChatColor.GREEN + "Resetting the mine named: \"" + mine.getName() + "\".");
     }
 
     @Override
     public @NotNull List<String> getUsages(@NotNull CommandSender sender) {
-        return Collections.singletonList("/" + getPath() + COMMAND_ALIAS + " <name> <time>");
+        return Collections.singletonList("/" + getPath() + COMMAND_ALIAS + " <name>");
     }
+
 }

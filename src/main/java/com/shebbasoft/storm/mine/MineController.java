@@ -1,5 +1,6 @@
 package com.shebbasoft.storm.mine;
 
+import com.shebbasoft.storm.mine.storage.Storage;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -15,13 +16,46 @@ import java.util.regex.Pattern;
 
 public class MineController implements Listener {
 
+    private static final long SAVE_TASK_DELAY = 12000L;
+    private static final long SAVE_TASK_PERIOD = 12000L;
     private static final Pattern NAME_PATTERN = Pattern.compile("^[A-Za-z0-9_]{3,16}$");
+
     private final Map<String, Mine> mineMap = new HashMap<>();
     private final StormMines plugin;
+    private final Storage storage;
+    private int taskId = -1;
 
     public MineController(StormMines plugin) {
         this.plugin = plugin;
+        this.storage = plugin.getStorage();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    }
+
+    public void initialize() {
+        load();
+
+        taskId = plugin.getServer().getScheduler()
+                .scheduleSyncRepeatingTask(plugin, this::save, SAVE_TASK_DELAY, SAVE_TASK_PERIOD);
+    }
+
+    public void close() {
+        if (taskId != -1) {
+            plugin.getServer().getScheduler().cancelTask(taskId);
+            taskId = -1;
+        }
+        save();
+    }
+
+    public void load() {
+        plugin.getLogger().info("Loading mines...");
+        mineMap.clear();
+
+        storage.loadMines().forEach(this::registerMine);
+    }
+
+    public void save() {
+        plugin.getLogger().info("Saving mines...");
+        mineMap.values().stream().filter(Mine::isDirty).forEach(storage::saveMine);
     }
 
     public void registerMine(Mine mine) {

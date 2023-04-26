@@ -1,6 +1,11 @@
 package com.shebbasoft.storm.mine;
 
+import com.sk89q.worldedit.bukkit.BukkitWorld;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Region;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 
 public class WorldEditArea implements Area {
 
@@ -9,6 +14,14 @@ public class WorldEditArea implements Area {
     public WorldEditArea(Region region) {
         this.region = region;
     }
+
+    public WorldEditArea(String worldName, int x1, int y1, int z1, int x2, int y2, int z2) {
+        World world = Bukkit.getWorld(worldName);
+        BlockVector3 minimum = BlockVector3.at(x1, y1, z1);
+        BlockVector3 maximum = BlockVector3.at(x2, y2, z2);
+        region = new CuboidRegion(new BukkitWorld(world), minimum, maximum);
+    }
+
     @Override
     public int getMinimumX() {
         return region.getMinimumPoint().getX();

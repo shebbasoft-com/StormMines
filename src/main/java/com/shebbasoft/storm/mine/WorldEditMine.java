@@ -3,43 +3,64 @@ package com.shebbasoft.storm.mine;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.bukkit.BukkitPlayer;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
-import com.sk89q.worldedit.extension.input.InputParseException;
-import com.sk89q.worldedit.extension.input.ParserContext;
 import com.sk89q.worldedit.function.pattern.Pattern;
+import com.sk89q.worldedit.function.pattern.RandomPattern;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Region;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class WorldEditMine implements Mine {
 
     private final String name;
     private String displayName;
-    private String pattern;
+    private Map<Material, Double> pattern = new HashMap<>();
     private Area area;
+    private boolean isResetTimeEnabled;
     private long resetTime;
+    private boolean isResetPercentageEnabled;
     private double resetPercentage;
 
-    private int blocksBroken;
+    private int blocksBroken = 0;
     private boolean isResetting = false;
     private Pattern worldEditPattern;
     private Region worldEditRegion;
     private int timedResetTask = -1;
+    private boolean isDirty = false;
+
+    public WorldEditMine(String name, String displayName, Map<Material, Double> pattern, Area area,
+                         boolean isResetTimeEnabled, long resetTime,
+                         boolean isResetPercentageEnabled, double resetPercentage) {
+        this.name = name;
+        this.displayName = displayName;
+        this.pattern = pattern;
+        this.area = area;
+        this.isResetTimeEnabled = isResetTimeEnabled;
+        this.resetTime = resetTime;
+        this.isResetPercentageEnabled = isResetPercentageEnabled;
+        this.resetPercentage = resetPercentage;
+    }
 
     public WorldEditMine(String name, Area area) {
         this.name = name;
         this.displayName = name;
-        this.resetTime = -1L;
-        this.resetPercentage = -1.0D;
+        this.isResetTimeEnabled = false;
+        this.resetTime = 6000; // 5~ minutes in ticks
+        this.isResetPercentageEnabled = false;
+        this.resetPercentage = 0.5; // 50%
+        this.isDirty = true;
 
+        setPatternEntry(Material.STONE, 1.0); // 100% stone
         setArea(area);
-        setPattern("minecraft:stone");
-        reset();
     }
 
     @Override
@@ -58,44 +79,39 @@ public class WorldEditMine implements Mine {
     }
 
     @Override
-    public String getPattern() {
-        return pattern;
+    public Map<Material, Double> getPattern() {
+        // should not be editable as it will not update the WorldEdit pattern. READ ONLY
+        return Collections.unmodifiableMap(pattern);
     }
 
     @Override
-    public void setPattern(String pattern) throws IllegalArgumentException {
-        ParserContext context = new ParserContext();
-
-        // probably not enough, try WorldEditMine#setPattern(pattern, player)
-        World world = Bukkit.getWorld(area.getWorldName());
-        if (world != null) {
-            context.setWorld(new BukkitWorld(world));
-        }
-
-        try {
-            this.worldEditPattern = WorldEdit.getInstance().getPatternFactory().parseFromInput(pattern, context);
-        } catch (InputParseException e) {
-            throw new IllegalArgumentException("Invalid WorldEdit pattern.");
-        }
-
-        this.pattern = pattern;
-
+    public void setPattern(Map<Material, Double> pattern) {
+        this.pattern = pattern; // todo copy/clone the pattern?
+        updateWorldEditPattern();
     }
 
-    public void setPattern(String pattern, Player player) throws IllegalArgumentException {
-        ParserContext context = new ParserContext();
-        BukkitPlayer bukkitPlayer = new BukkitPlayer(player);
-        context.setActor(bukkitPlayer);
-        context.setWorld(bukkitPlayer.getWorld());
-        context.setSession(WorldEdit.getInstance().getSessionManager().getIfPresent(bukkitPlayer));
+    @Override
+    public void setPatternEntry(Material material, double chance) {
+        pattern.put(material, chance);
+        updateWorldEditPattern();
+    }
 
-        try {
-            worldEditPattern = WorldEdit.getInstance().getPatternFactory().parseFromInput(pattern, context);
-        } catch (InputParseException e) {
-            throw new IllegalArgumentException("Invalid WorldEdit pattern.");
+    @Override
+    public boolean removePatternEntry(Material material) {
+        if (pattern.remove(material) == null) {
+            return false;
         }
+        updateWorldEditPattern();
+        return true;
+    }
 
-        this.pattern = pattern;
+    private void updateWorldEditPattern() {
+        RandomPattern randomPattern = new RandomPattern();
+        pattern.forEach((material, chance) -> {
+            randomPattern.add(BukkitAdapter.adapt(material.createBlockData()), chance);
+        });
+        worldEditPattern = randomPattern;
+        isDirty = true;
     }
 
     @Override
@@ -114,6 +130,7 @@ public class WorldEditMine implements Mine {
             worldEditRegion = new CuboidRegion(new BukkitWorld(world), minimum, maximum);
         }
         this.area = area;
+        isDirty = true;
     }
 
     @Override
@@ -128,13 +145,36 @@ public class WorldEditMine implements Mine {
     }
 
     @Override
+    public boolean isResetTimeEnabled() {
+        return isResetTimeEnabled;
+    }
+
+    @Override
+    public void setResetTimeEnabled(boolean enabled) {
+        isResetTimeEnabled = enabled;
+        isDirty = true;
+    }
+
+    @Override
     public long getResetTime() {
         return resetTime;
     }
 
     @Override
     public void setResetTime(long time) {
-        this.resetTime = time;
+        resetTime = time;
+        isDirty = true;
+    }
+
+    @Override
+    public boolean isResetPercentageEnabled() {
+        return isResetPercentageEnabled;
+    }
+
+    @Override
+    public void setResetPercentageEnabled(boolean enabled) {
+        isResetPercentageEnabled = enabled;
+        isDirty = true;
     }
 
     @Override
@@ -144,19 +184,20 @@ public class WorldEditMine implements Mine {
 
     @Override
     public void setResetPercentage(double percentage) {
-        this.resetPercentage = percentage;
+        resetPercentage = percentage;
+        isDirty = true;
     }
 
     @Override
     public void setBlocksBroken(int amount) {
         this.blocksBroken = amount;
 
-        if (resetPercentage > 0 && blocksBroken >= (area.getVolume() * (1.0 - resetPercentage))) {
+        if (isResetPercentageEnabled && resetPercentage > 0 && blocksBroken >= (area.getVolume() * (1.0 - resetPercentage))) {
             reset();
             return; // already resetting
         }
 
-        if (resetTime > 0 && timedResetTask != -1 && blocksBroken <= 0) {
+        if (isResetTimeEnabled && resetTime > 0 && timedResetTask != -1 && blocksBroken <= 0) {
             // start time reset
             timedResetTask = Bukkit.getScheduler().scheduleSyncDelayedTask(StormMines.getInstance(), this::reset, resetTime * 20L);
         }
@@ -176,12 +217,22 @@ public class WorldEditMine implements Mine {
         try (EditSession editSession = WorldEdit.getInstance().newEditSession(worldEditRegion.getWorld())) {
             isResetting = true;
             editSession.setBlocks(worldEditRegion, worldEditPattern);
-            // this probably will not be accurate when using FAWE, needs testing, check if FAWE has a thenAccept() method
-            blocksBroken = 0;
         } catch (MaxChangedBlocksException e) {
             throw new RuntimeException(e);
+        } finally {
+            blocksBroken = 0;
         }
 
         isResetting = false;
+    }
+
+    @Override
+    public boolean isDirty() {
+        return isDirty;
+    }
+
+    @Override
+    public void setDirty(boolean isDirty) {
+        this.isDirty = isDirty;
     }
 }

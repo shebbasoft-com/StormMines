@@ -13,12 +13,12 @@ public class MineCommand extends OptionCommand {
     private static final List<String> COMMAND_ALIASES = Collections.singletonList(COMMAND_ALIAS);
 
     public MineCommand(StormMines plugin) {
-        addOption(new CreateCommand(plugin));
-        addOption(new ResetCommand(plugin));
-        addOption(new ListCommand(plugin));
-        addOption(new SetPatternCommand(plugin));
-        addOption(new SetResetTimeCommand(plugin));
-        addOption(new SetResetPercentageCommand(plugin));
+        addOption(new MineCreateCommand(plugin));
+        addOption(new MineResetCommand(plugin));
+        addOption(new MineListCommand(plugin));
+        addOption(new MinePatternCommand(plugin));
+        addOption(new MineResetTimeCommand(plugin));
+        addOption(new MineResetPercentageCommand(plugin));
     }
 
     @Override

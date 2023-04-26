@@ -1,6 +1,9 @@
 package com.shebbasoft.storm.mine;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
+
+import java.util.Map;
 
 public interface Mine {
 
@@ -10,9 +13,13 @@ public interface Mine {
 
     void setDisplayName(String name);
 
-    String getPattern();
+    Map<Material, Double> getPattern();
 
-    void setPattern(String pattern) throws IllegalArgumentException;
+    void setPattern(Map<Material, Double> pattern);
+
+    void setPatternEntry(Material material, double chance);
+
+    boolean removePatternEntry(Material material);
 
     Area getArea();
 
@@ -20,9 +27,17 @@ public interface Mine {
 
     boolean isInside(Block block);
 
+    boolean isResetTimeEnabled();
+
+    void setResetTimeEnabled(boolean enabled);
+
     long getResetTime();
 
     void setResetTime(long time);
+
+    boolean isResetPercentageEnabled();
+
+    void setResetPercentageEnabled(boolean enabled);
 
     double getResetPercentage();
 
@@ -33,6 +48,10 @@ public interface Mine {
     int getBlocksBroken();
 
     void reset();
+
+    boolean isDirty();
+
+    void setDirty(boolean isDirty);
 
     
 }

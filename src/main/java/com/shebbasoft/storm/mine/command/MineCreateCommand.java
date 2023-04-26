@@ -20,14 +20,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class CreateCommand extends SimpleCommand {
+public class MineCreateCommand extends SimpleCommand {
 
     private static final String COMMAND_ALIAS = "create";
     private static final List<String> COMMAND_ALIASES = Collections.singletonList(COMMAND_ALIAS);
 
     private final MineController mineController;
 
-    public CreateCommand(StormMines plugin) {
+    public MineCreateCommand(StormMines plugin) {
         mineController = plugin.getMineController();
     }
 
