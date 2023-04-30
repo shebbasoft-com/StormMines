@@ -13,14 +13,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class PatternsSetMaterialCommand extends SimpleCommand {
+public class PatternUnsetMaterialCommand extends SimpleCommand {
 
-    private static final String COMMAND_ALIAS = "set";
+    private static final String COMMAND_ALIAS = "unset";
     private static final List<String> COMMAND_ALIASES = Collections.singletonList(COMMAND_ALIAS);
 
     private final MineController mineController;
 
-    public PatternsSetMaterialCommand(StormMines plugin) {
+    public PatternUnsetMaterialCommand(StormMines plugin) {
         mineController = plugin.getMineController();
     }
 
@@ -31,7 +31,7 @@ public class PatternsSetMaterialCommand extends SimpleCommand {
 
     @Override
     public void onCommand(@NotNull CommandSender sender, @NotNull String[] arguments) {
-        if (arguments.length != 3) {
+        if (arguments.length != 2) {
             sender.sendMessage(ChatColor.RED + "Error: invalid command syntax.");
             getUsages(sender).forEach(usage -> sender.sendMessage(ChatColor.AQUA + usage));
             return;
@@ -45,14 +45,6 @@ public class PatternsSetMaterialCommand extends SimpleCommand {
             return;
         }
 
-        double chance;
-        try {
-            chance = Double.parseDouble(arguments[2]);
-        } catch (NumberFormatException e) {
-            sender.sendMessage(ChatColor.RED + "Error: Invalid chance.");
-            return;
-        }
-
         Optional<Mine> optionalMine = mineController.getMine(arguments[0]);
 
         if (optionalMine.isEmpty()) {
@@ -62,18 +54,13 @@ public class PatternsSetMaterialCommand extends SimpleCommand {
 
         Mine mine = optionalMine.get();
 
-        if (chance <= 0.0) {
-            mine.removePatternEntry(material);
-        } else {
-            mine.setPatternEntry(material, chance);
-        }
-
+        mine.removePatternEntry(material);
         mine.reset();
         sender.sendMessage(ChatColor.GREEN + "Updated mine pattern.");
     }
 
     @Override
-    public @NotNull List<String> getUsages(@NotNull CommandSender sender) {
-        return Collections.singletonList("/" + getPath() + COMMAND_ALIAS + " <mine> <material> <chance>");
+    public @NotNull List<String> getUsages(@NotNull CommandSender commandSender) {
+        return Collections.singletonList("/" + getPath() + COMMAND_ALIAS + " <mine> <material>");
     }
 }

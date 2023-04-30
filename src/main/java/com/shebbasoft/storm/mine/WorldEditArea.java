@@ -44,12 +44,12 @@ public class WorldEditArea implements Area {
 
     @Override
     public int getMaximumY() {
-        return region.getMaximumPoint().getX();
+        return region.getMaximumPoint().getY();
     }
 
     @Override
     public int getMaximumZ() {
-        return region.getMaximumPoint().getX();
+        return region.getMaximumPoint().getZ();
     }
 
     @Override

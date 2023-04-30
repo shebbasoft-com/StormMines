@@ -14,6 +14,7 @@ public class MineCommand extends OptionCommand {
 
     public MineCommand(StormMines plugin) {
         addOption(new MineCreateCommand(plugin));
+        addOption(new MineInfoCommand(plugin));
         addOption(new MineResetCommand(plugin));
         addOption(new MineListCommand(plugin));
         addOption(new MinePatternCommand(plugin));

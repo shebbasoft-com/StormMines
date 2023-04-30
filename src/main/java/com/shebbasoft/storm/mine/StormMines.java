@@ -26,6 +26,8 @@ public class StormMines extends JavaPlugin {
         storage.initialize();
 
         mineController = new MineController(this);
+        mineController.initialize();
+
         CommandManager commandManager = new SimpleCommandManager(this);
         commandManager.register(new MineCommand(this));
     }

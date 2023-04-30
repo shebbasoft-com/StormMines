@@ -94,7 +94,7 @@ public class MineController implements Listener {
     public void onBlockBreakEvent(BlockBreakEvent event) {
         mineMap.values().stream()
                 .filter(mine -> mine.isInside(event.getBlock()))
-                .forEach(mine -> mine.setBlocksBroken(mine.getBlocksBroken() - 1));
+                .forEach(mine -> mine.setBlocksBroken(mine.getBlocksBroken() + 1));
         // probably best if Mine class handles this, so it doesn't break the blocks broken count.
     }
 

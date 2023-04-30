@@ -53,6 +53,8 @@ public class MineResetTimeCommand extends SimpleCommand {
         }
 
         Mine mine = optionalMine.get();
+
+        mine.setResetTimeEnabled(time > 0L);
         mine.setResetTime(time);
         sender.sendMessage(ChatColor.GREEN + "Set mine reset time successfully.");
     }

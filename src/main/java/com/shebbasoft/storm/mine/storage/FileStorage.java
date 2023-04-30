@@ -6,13 +6,16 @@ import com.shebbasoft.storm.mine.MineBuilder;
 import com.shebbasoft.storm.mine.StormMines;
 import com.shebbasoft.storm.mine.WorldEditArea;
 import com.shebbasoft.storm.mine.WorldEditMine;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.logging.Level;
 
 public class FileStorage implements Storage {
 
@@ -54,13 +58,19 @@ public class FileStorage implements Storage {
         }
 
         for (File file : files) {
+            if (file.exists()) {
+                plugin.getLogger().warning("FOUND " + file.getPath());
+            } else {
+                plugin.getLogger().warning("NOT FOUND " + file.getPath());
+            }
+
             YamlConfiguration configuration = YamlConfiguration.loadConfiguration(file);
 
             String name = configuration.getString("name");
             String worldName = configuration.getString("world");
 
-            if (!configuration.contains("x1") || configuration.contains("y1") || configuration.contains("z1") ||
-                    !configuration.contains("x2") || configuration.contains("y2") || configuration.contains("z2") ||
+            if (!configuration.contains("x1") || !configuration.contains("y1") || !configuration.contains("z1") ||
+                    !configuration.contains("x2") || !configuration.contains("y2") || !configuration.contains("z2") ||
                     name == null || worldName == null) {
                 plugin.getLogger().warning("Mine file was missing minimum values and got ignored: " + file.getName());
                 continue;

@@ -5,16 +5,17 @@ import com.shebbasoft.storm.mine.StormMines;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class MinePatternCommand extends OptionCommand {
 
-    private static final String COMMAND_ALIAS = "setpattern";
-    private static final List<String> COMMAND_ALIASES = Arrays.asList(COMMAND_ALIAS, "pattern");
+    private static final String COMMAND_ALIAS = "pattern";
+    private static final List<String> COMMAND_ALIASES = Collections.singletonList(COMMAND_ALIAS);
 
     public MinePatternCommand(StormMines plugin) {
         addOption(new PatternsSetMaterialCommand(plugin));
-        addOption(new PatternRemoveMaterialCommand(plugin));
+        addOption(new PatternUnsetMaterialCommand(plugin));
     }
 
     @Override

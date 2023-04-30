@@ -48,19 +48,23 @@ public class WorldEditMine implements Mine {
         this.resetTime = resetTime;
         this.isResetPercentageEnabled = isResetPercentageEnabled;
         this.resetPercentage = resetPercentage;
+
+        updateWorldEditPattern();
+        updateWorldEditArea();
     }
 
     public WorldEditMine(String name, Area area) {
         this.name = name;
         this.displayName = name;
+        this.area = area;
         this.isResetTimeEnabled = false;
         this.resetTime = 6000; // 5~ minutes in ticks
         this.isResetPercentageEnabled = false;
         this.resetPercentage = 0.5; // 50%
         this.isDirty = true;
 
-        setPatternEntry(Material.STONE, 1.0); // 100% stone
-        setArea(area);
+        updateWorldEditPattern();
+        updateWorldEditArea();
     }
 
     @Override
@@ -87,12 +91,14 @@ public class WorldEditMine implements Mine {
     @Override
     public void setPattern(Map<Material, Double> pattern) {
         this.pattern = pattern; // todo copy/clone the pattern?
+        isDirty = true;
         updateWorldEditPattern();
     }
 
     @Override
     public void setPatternEntry(Material material, double chance) {
         pattern.put(material, chance);
+        isDirty = true;
         updateWorldEditPattern();
     }
 
@@ -101,6 +107,7 @@ public class WorldEditMine implements Mine {
         if (pattern.remove(material) == null) {
             return false;
         }
+        isDirty = true;
         updateWorldEditPattern();
         return true;
     }
@@ -111,7 +118,6 @@ public class WorldEditMine implements Mine {
             randomPattern.add(BukkitAdapter.adapt(material.createBlockData()), chance);
         });
         worldEditPattern = randomPattern;
-        isDirty = true;
     }
 
     @Override
@@ -121,21 +127,21 @@ public class WorldEditMine implements Mine {
 
     @Override
     public void setArea(Area area) {
-        if (area instanceof WorldEditArea worldEditArea) {
-            worldEditRegion = worldEditArea.getRegion();
-        } else {
-            World world = Bukkit.getWorld(area.getWorldName());
-            BlockVector3 minimum = BlockVector3.at(area.getMinimumX(), area.getMinimumY(), area.getMinimumZ());
-            BlockVector3 maximum = BlockVector3.at(area.getMaximumX(), area.getMaximumY(), area.getMaximumZ());
-            worldEditRegion = new CuboidRegion(new BukkitWorld(world), minimum, maximum);
-        }
         this.area = area;
+        updateWorldEditArea();
         isDirty = true;
+    }
+
+    private void updateWorldEditArea() {
+        World world = Bukkit.getWorld(area.getWorldName());
+        BlockVector3 minimum = BlockVector3.at(area.getMinimumX(), area.getMinimumY(), area.getMinimumZ());
+        BlockVector3 maximum = BlockVector3.at(area.getMaximumX(), area.getMaximumY(), area.getMaximumZ());
+        worldEditRegion = new CuboidRegion(new BukkitWorld(world), minimum, maximum);
     }
 
     @Override
     public boolean isInside(Block block) {
-        if (area.getWorldName().equals(block.getWorld().getName())) {
+        if (!area.getWorldName().equals(block.getWorld().getName())) {
             return false;
         }
         return block.getX() >= area.getMinimumX() && block.getX() <= area.getMaximumX() &&
@@ -197,7 +203,7 @@ public class WorldEditMine implements Mine {
             return; // already resetting
         }
 
-        if (isResetTimeEnabled && resetTime > 0 && timedResetTask != -1 && blocksBroken <= 0) {
+        if (isResetTimeEnabled && resetTime > 0 && timedResetTask == -1 && blocksBroken > 0) {
             // start time reset
             timedResetTask = Bukkit.getScheduler().scheduleSyncDelayedTask(StormMines.getInstance(), this::reset, resetTime * 20L);
         }
@@ -214,6 +220,7 @@ public class WorldEditMine implements Mine {
             return;
         }
 
+        StormMines.getInstance().getLogger().info("Resetting mine: " + name);
         try (EditSession editSession = WorldEdit.getInstance().newEditSession(worldEditRegion.getWorld())) {
             isResetting = true;
             editSession.setBlocks(worldEditRegion, worldEditPattern);
@@ -224,6 +231,7 @@ public class WorldEditMine implements Mine {
         }
 
         isResetting = false;
+        timedResetTask = -1;
     }
 
     @Override

@@ -53,6 +53,7 @@ public class MineResetPercentageCommand extends SimpleCommand {
         }
 
         Mine mine = optionalMine.get();
+        mine.setResetPercentageEnabled(!(percentage <= 0.0));
         mine.setResetPercentage(percentage);
         sender.sendMessage(ChatColor.GREEN + "Set mine reset percentage successfully.");
     }
