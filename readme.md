@@ -12,3 +12,4 @@ A simple mine plugin for prison servers (still in development).
 - [ ] Set display name command
 - [ ] Add descriptions to commands (ShebbasoftLib)
 - [ ] Help command
+- [x] Remove command

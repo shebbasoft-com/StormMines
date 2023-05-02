@@ -20,6 +20,7 @@ public class MineCommand extends OptionCommand {
         addOption(new MinePatternCommand(plugin));
         addOption(new MineResetTimeCommand(plugin));
         addOption(new MineResetPercentageCommand(plugin));
+        addOption(new MineRemoveCommand(plugin));
     }
 
     @Override
